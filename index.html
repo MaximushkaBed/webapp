@@ -90,7 +90,7 @@
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
+                    maintainAspectRatio: true,
                     scales: {
                         x: {
                             title: {
@@ -106,7 +106,11 @@
                             beginAtZero: true,
                             title: {
                                 display: true,
-                                text: 'Продажи'
+                                text: 'Количество продаж'
+                            },
+                            ticks: {
+                                suggestedMin: 0,  // Это поможет избежать бесконечного увеличения
+                                stepSize: 1
                             }
                         }
                     },
