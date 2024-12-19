@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,7 +15,7 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            background-color: #f4f4f9;
+            background-color: #f9f9f9;
         }
 
         canvas {
@@ -27,6 +27,12 @@
             font-size: 1.5em;
             margin-bottom: 20px;
             text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.2em;
+            }
         }
     </style>
 </head>
@@ -42,27 +48,43 @@
         if (dates.length === 0) {
             document.body.innerHTML = "<h1>Нет данных для отображения графика</h1>";
         } else {
-            // Подсчет количества продаж на каждую дату
-            const salesData = dates.reduce((acc, date) => {
-                acc[date] = (acc[date] || 0) + 1;
+            // Считаем количество продаж по месяцам
+            const salesData = dates.reduce((acc, dateStr) => {
+                const date = new Date(dateStr);
+                const monthYear = `${date.getMonth() + 1}-${date.getFullYear()}`; // "Месяц-Год"
+                acc[monthYear] = (acc[monthYear] || 0) + 1;
                 return acc;
             }, {});
 
-            // Преобразуем данные для графика
-            const labels = Object.keys(salesData); // Даты
-            const sales = Object.values(salesData); // Количество продаж
+            // Получаем отсортированные данные по месяцам
+            const labels = Object.keys(salesData).sort((a, b) => {
+                const [monthA, yearA] = a.split('-').map(Number);
+                const [monthB, yearB] = b.split('-').map(Number);
+                return new Date(yearA, monthA - 1) - new Date(yearB, monthB - 1);
+            });
+
+            const sales = labels.map(label => salesData[label]);
+
+            // Массив месяцев для отображения на оси X
+            const months = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь'];
+
+            // Преобразуем метки месяцев и годов
+            const formattedLabels = labels.map(label => {
+                const [month, year] = label.split('-');
+                return `${months[month - 1]} ${year}`;
+            });
 
             // Отрисовка графика с помощью Chart.js
             const ctx = document.getElementById('salesChart').getContext('2d');
             new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: labels,
+                    labels: formattedLabels,
                     datasets: [{
                         label: 'Количество продаж',
                         data: sales,
-                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
                         borderWidth: 1
                     }]
                 },
@@ -73,7 +95,7 @@
                         x: {
                             title: {
                                 display: true,
-                                text: 'Дата'
+                                text: 'Месяц'
                             },
                             ticks: {
                                 maxRotation: 45,
