@@ -1,87 +1,108 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>График продаж</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #f4f4f9;
+        }
+
+        canvas {
+            max-width: 100%;
+            height: auto;
+        }
+
+        h1 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
     <h1>График продаж</h1>
-    <canvas id="salesChart" width="400" height="200"></canvas>
+    <canvas id="salesChart"></canvas>
 
     <script>
         // Извлечение параметра dates из URL
         const urlParams = new URLSearchParams(window.location.search);
-        const dates = JSON.parse(urlParams.get("dates") || "[]").map(date => new Date(date));
+        const dates = JSON.parse(urlParams.get("dates") || "[]");
 
-        // Генерация диапазона 13 месяцев (включая текущий месяц)
-        const now = new Date();
-        const startDate = new Date(now.getFullYear(), now.getMonth() - 12, 1); // 13 месяцев назад
-        const allMonths = [];
-        for (let date = new Date(startDate); date <= now; date.setMonth(date.getMonth() + 1)) {
-            allMonths.push(new Date(date));
-        }
+        if (dates.length === 0) {
+            document.body.innerHTML = "<h1>Нет данных для отображения графика</h1>";
+        } else {
+            // Подсчет количества продаж на каждую дату
+            const salesData = dates.reduce((acc, date) => {
+                acc[date] = (acc[date] || 0) + 1;
+                return acc;
+            }, {});
 
-        // Подсчёт количества продаж по месяцам
-        const salesData = allMonths.map(month => {
-            const monthStart = new Date(month.getFullYear(), month.getMonth(), 1);
-            const monthEnd = new Date(month.getFullYear(), month.getMonth() + 1, 0);
-            const salesCount = dates.filter(date => date >= monthStart && date <= monthEnd).length;
-            return salesCount;
-        });
+            // Преобразуем данные для графика
+            const labels = Object.keys(salesData); // Даты
+            const sales = Object.values(salesData); // Количество продаж
 
-        // Названия месяцев на русском
-        const monthsRu = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 
-                          'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь'];
-        const labels = allMonths.map(month => `${monthsRu[month.getMonth()]} ${month.getFullYear()}`);
-
-        // Отрисовка графика с помощью Chart.js
-        const ctx = document.getElementById('salesChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Количество продаж',
-                    data: salesData,
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    x: {
-                        ticks: {
-                            callback: function(value, index) {
-                                return labels[index]; // Поворот меток по оси X
+            // Отрисовка графика с помощью Chart.js
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Количество продаж',
+                        data: sales,
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Дата'
+                            },
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Продажи'
                             }
                         }
                     },
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return `${context.raw} продаж`;
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return `Продажи: ${context.raw}`;
+                                }
                             }
                         }
                     }
                 }
-            }
-        });
+            });
+        }
     </script>
 </body>
 </html>
