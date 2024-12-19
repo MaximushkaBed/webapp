@@ -43,24 +43,11 @@
             margin-bottom: 20px;
         }
 
-        .filters select, .filters button {
+        .filters select {
             padding: 10px;
             font-size: 16px;
             border: 1px solid #ddd;
             border-radius: 5px;
-        }
-
-        .filters button {
-            background-color: #007bff;
-            color: white;
-            cursor: pointer;
-        }
-
-        .filters button:hover {
-            background-color: #0056b3;
-        }
-
-        .filters select {
             width: 200px;
         }
 
@@ -83,12 +70,11 @@
 
     <!-- Фильтры для выбора временного диапазона -->
     <div class="filters">
-        <select id="dateRange">
+        <select id="dateRange" onchange="loadData()">
             <option value="12">Последние 12 месяцев</option>
             <option value="6">Последние 6 месяцев</option>
             <option value="3">Последние 3 месяца</option>
         </select>
-        <button onclick="loadData()">Применить</button>
     </div>
 
     <canvas id="salesChart"></canvas>
