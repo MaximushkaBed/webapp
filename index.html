@@ -48,9 +48,9 @@
         if (dates.length === 0) {
             document.body.innerHTML = "<h1>Нет данных для отображения графика</h1>";
         } else {
-            // Считаем количество продаж по месяцам
+            // Преобразуем строки дат в объекты Date и группируем по месяцам
             const salesData = dates.reduce((acc, dateStr) => {
-                const date = new Date(dateStr);
+                const date = new Date(dateStr.split('.').reverse().join('-'));  // Преобразуем формат 'DD.MM.YYYY' в 'YYYY-MM-DD'
                 const monthYear = `${date.getMonth() + 1}-${date.getFullYear()}`; // "Месяц-Год"
                 acc[monthYear] = (acc[monthYear] || 0) + 1;
                 return acc;
