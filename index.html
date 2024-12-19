@@ -7,15 +7,29 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            background-color: #f9f9f9;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 20px;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
         }
 
         canvas {
@@ -23,112 +37,172 @@
             height: auto;
         }
 
-        h1 {
-            font-size: 1.5em;
+        .filters {
+            display: flex;
+            justify-content: space-between;
             margin-bottom: 20px;
-            text-align: center;
+        }
+
+        .filters select, .filters button {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .filters button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+
+        .filters button:hover {
+            background-color: #0056b3;
+        }
+
+        .filters select {
+            width: 200px;
         }
 
         @media (max-width: 768px) {
-            h1 {
-                font-size: 1.2em;
+            .filters {
+                flex-direction: column;
+                align-items: center;
+            }
+            .filters select {
+                width: 100%;
+                margin-bottom: 10px;
             }
         }
     </style>
 </head>
 <body>
-    <h1>График продаж</h1>
-    <canvas id="salesChart"></canvas>
 
-    <script>
-        // Извлечение параметра dates из URL
+<div class="container">
+    <h1>График продаж</h1>
+
+    <!-- Фильтры для выбора временного диапазона -->
+    <div class="filters">
+        <select id="dateRange">
+            <option value="12">Последние 12 месяцев</option>
+            <option value="6">Последние 6 месяцев</option>
+            <option value="3">Последние 3 месяца</option>
+        </select>
+        <button onclick="loadData()">Применить</button>
+    </div>
+
+    <canvas id="salesChart"></canvas>
+</div>
+
+<script>
+    // Преобразуем строковые даты в объект Date и группируем по месяцам
+    function processDates(dates) {
+        const salesData = dates.reduce((acc, dateStr) => {
+            const date = new Date(dateStr.split('.').reverse().join('-'));  // Преобразуем 'DD.MM.YYYY' в 'YYYY-MM-DD'
+            const monthYear = `${date.getMonth() + 1}-${date.getFullYear()}`;
+            acc[monthYear] = (acc[monthYear] || 0) + 1;
+            return acc;
+        }, {});
+
+        // Получаем отсортированные данные по месяцам
+        const labels = Object.keys(salesData).sort((a, b) => {
+            const [monthA, yearA] = a.split('-').map(Number);
+            const [monthB, yearB] = b.split('-').map(Number);
+            return new Date(yearA, monthA - 1) - new Date(yearB, monthB - 1);
+        });
+
+        const sales = labels.map(label => salesData[label]);
+
+        // Массив месяцев для отображения на оси X
+        const months = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь'];
+
+        const formattedLabels = labels.map(label => {
+            const [month, year] = label.split('-');
+            return `${months[month - 1]} ${year}`;
+        });
+
+        return { formattedLabels, sales };
+    }
+
+    // Функция загрузки данных с учетом выбранного диапазона
+    function loadData() {
+        const dateRange = document.getElementById("dateRange").value;
+        const today = new Date();
+        const startDate = new Date(today.getFullYear(), today.getMonth() - dateRange, 1);
+
+        // Получаем данные для графика из URL
         const urlParams = new URLSearchParams(window.location.search);
         const dates = JSON.parse(urlParams.get("dates") || "[]");
 
-        if (dates.length === 0) {
-            document.body.innerHTML = "<h1>Нет данных для отображения графика</h1>";
-        } else {
-            // Преобразуем строки дат в объекты Date и группируем по месяцам
-            const salesData = dates.reduce((acc, dateStr) => {
-                const date = new Date(dateStr.split('.').reverse().join('-'));  // Преобразуем формат 'DD.MM.YYYY' в 'YYYY-MM-DD'
-                const monthYear = `${date.getMonth() + 1}-${date.getFullYear()}`; // "Месяц-Год"
-                acc[monthYear] = (acc[monthYear] || 0) + 1;
-                return acc;
-            }, {});
+        // Фильтруем данные по выбранному диапазону
+        const filteredDates = dates.filter(dateStr => {
+            const date = new Date(dateStr.split('.').reverse().join('-'));
+            return date >= startDate;
+        });
 
-            // Получаем отсортированные данные по месяцам
-            const labels = Object.keys(salesData).sort((a, b) => {
-                const [monthA, yearA] = a.split('-').map(Number);
-                const [monthB, yearB] = b.split('-').map(Number);
-                return new Date(yearA, monthA - 1) - new Date(yearB, monthB - 1);
-            });
+        const { formattedLabels, sales } = processDates(filteredDates);
 
-            const sales = labels.map(label => salesData[label]);
+        // Отрисовка графика с помощью Chart.js
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        if (window.chart) window.chart.destroy();  // Удаляем предыдущий график перед рисованием нового
 
-            // Массив месяцев для отображения на оси X
-            const months = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь'];
-
-            // Преобразуем метки месяцев и годов
-            const formattedLabels = labels.map(label => {
-                const [month, year] = label.split('-');
-                return `${months[month - 1]} ${year}`;
-            });
-
-            // Отрисовка графика с помощью Chart.js
-            const ctx = document.getElementById('salesChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: formattedLabels,
-                    datasets: [{
-                        label: 'Количество продаж',
-                        data: sales,
-                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    scales: {
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Месяц'
-                            },
-                            ticks: {
-                                maxRotation: 45,
-                                minRotation: 45
-                            }
+        window.chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: formattedLabels,
+                datasets: [{
+                    label: 'Количество продаж',
+                    data: sales,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Месяц'
                         },
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Количество продаж'
-                            },
-                            ticks: {
-                                suggestedMin: 0,  // Это поможет избежать бесконечного увеличения
-                                stepSize: 1
-                            }
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45
                         }
                     },
-                    plugins: {
-                        legend: {
-                            position: 'top'
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Количество продаж'
                         },
-                        tooltip: {
-                            callbacks: {
-                                label: function (context) {
-                                    return `Продажи: ${context.raw}`;
-                                }
+                        ticks: {
+                            suggestedMin: 0,
+                            stepSize: 1
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return `Продажи: ${context.raw}`;
                             }
                         }
                     }
                 }
-            });
-        }
-    </script>
+            }
+        });
+    }
+
+    // Загружаем данные при первом запуске
+    loadData();
+</script>
+
 </body>
 </html>
