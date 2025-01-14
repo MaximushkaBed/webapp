@@ -3,192 +3,320 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>График продаж</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background-color: #f0f0f0;
-        }
+    <title>Калькулятор прибыли</title>
+    <link rel="stylesheet" href="style.css">
 
-        .container {
-            width: 90%;
-            max-width: 1200px;
-            margin: 20px;
-            background-color: white;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            border-radius: 8px;
-        }
-
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-
-        canvas {
-            max-width: 100%;
-            height: auto;
-        }
-
-        .filters {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-
-        .filters select {
-            padding: 10px;
-            font-size: 16px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            width: 200px;
-        }
-
-        @media (max-width: 768px) {
-            .filters {
-                flex-direction: column;
-                align-items: center;
-            }
-            .filters select {
-                width: 100%;
-                margin-bottom: 10px;
-            }
-        }
-    </style>
 </head>
 <body>
+    <h1>Калькулятор прибыли</h1>
+    <div class="product-title"></div>
+    <div class="breadcrumb">
+        
+    </div>
+    
+    <div class="container">
+        <div class="form-section">
+            <div class="section">
+                <h2>Товар</h2>
+                <div class="form-group">
+                    <label>
+                        <span class="label-text">Стоимость, ₸ <span class="info-icon" title="Цена продажи товара"></span></span>
+                        <input type="number" id="itemPrice">
+                    </label>
+                    <label>
+                        <span class="label-text">Себестоимость, ₸ <span class="info-icon" title="Закупочная цена товара"></span></span>
+                        <input type="number" id="itemCost">
+                    </label>
+                    <label>
+                        <span class="label-text">Вес, кг. <span class="info-icon" title="Вес товара для расчета доставки"></span></span>
+                        <input type="number" id="itemWeight">
+                    </label>
+                </div>
+            </div>
 
-<div class="container">
-    <h1>График продаж</h1>
+            <div class="section">
+                <h2>Маркетплейс</h2>
+                <div class="form-group">
+                    <div class="inline-group">
+                        <label>
+                            <span class="label-text">Комиссия Kaspi, % <span class="info-icon" title="Комиссия маркетплейса с продажи"></span></span>
+                            <input type="number" id="kaspiCommission">
+                        </label>
+                        <label class="tenge-label">
+                            <span class="label-text">В тенге</span>
+                            <input type="number" id="kaspiCommissionTenge" readonly>
+                        </label>
+                    </div>
+                    <div class="inline-group">
+                        <label>
+                            <span class="label-text">Брак, % <span class="info-icon" title="Процент товара с браком или повреждениями"></span></span>
+                            <input type="number" id="defectPercent">
+                        </label>
+                        <label class="tenge-label">
+                            <span class="label-text">В тенге</span>
+                            <input type="number" id="defectTenge" readonly>
+                        </label>
+                    </div>
+                    <div class="delivery-group">
+                        <div class="inline-group">
+                            <label>
+                                <span class="label-text">Тип доставки <span class="info-icon" title="Выберите тип доставки: межгород или городская"></span></span>
+                                <select id="deliveryType">
+                                    <option value="0" selected>Межгород</option>
+                                    <option value="500">Городская</option>
+                                </select>
+                            </label>
+                            <label class="tenge-label">
+                                <span class="label-text">Стоимость, ₸</span>
+                                <input type="number" id="deliveryCost" value="0" readonly>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    <!-- Фильтры для выбора временного диапазона -->
-    <div class="filters">
-        <select id="dateRange" onchange="loadData()">
-            <option value="12">Последние 12 месяцев</option>
-            <option value="6">Последние 6 месяцев</option>
-            <option value="3">Последние 3 месяца</option>
-        </select>
+            <div class="section">
+                <h2>Налоги</h2>
+                <div class="form-group">
+                    <label>
+                        <span class="label-text">Налоги, ₸ <span class="info-icon" title="Налоги с продажи (3% от стоимости)"></span></span>
+                        <input type="number" id="taxes"  readonly>
+                    </label>
+                    <label>
+                        <span class="label-text">Kaspi Pay, ₸ <span class="info-icon" title="Комиссия за прием платежей (0.95% от стоимости)"></span></span>
+                        <input type="number" id="kaspiPay" readonly>
+                    </label>
+                    <label>
+                        <span class="label-text">Прочие расходы, ₸ <span class="info-icon" title="Дополнительные расходы на единицу товара"></span></span>
+                        <input type="number" id="otherExpenses">
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="result-section">
+            <h2>Расчет за 1 единицу</h2>
+            <div class="result-group">
+                <label>
+                    <span>Вложения <span class="info-icon" title="Общая сумма затрат на единицу товара"></span></span>
+                    <div class="result-value-wrapper">
+                        <input type="number" id="totalInvestments" readonly>
+                        <span class="unit">₸</span>
+                    </div>
+                </label>
+                <label>
+                    <span>Доходность <span class="info-icon" title="Процент прибыли относительно вложений"></span></span>
+                    <div class="result-value-wrapper">
+                        <input type="number" id="profitability" readonly>
+                        <span class="unit">%</span>
+                    </div>
+                </label>
+                <label>
+                    <span>Маржинальность <span class="info-icon" title="Процент прибыли относительно цены продажи"></span></span>
+                    <div class="result-value-wrapper">
+                        <input type="number" id="marginality" readonly>
+                        <span class="unit">%</span>
+                    </div>
+                </label>
+                <label>
+                    <span>Минимальная цена <span class="info-icon" title="Минимальная цена для продажи без убытка"></span></span>
+                    <div class="result-value-wrapper">
+                        <input type="number" id="minPrice" readonly>
+                        <span class="unit">₸</span>
+                    </div>
+                </label>
+                <label>
+                    <span>Маржинальная прибыль <span class="info-icon" title="Прибыль с одной единицы товара"></span></span>
+                    <div class="result-value-wrapper">
+                        <input type="number" id="marginalProfit" readonly>
+                        <span class="unit">₸</span>
+                    </div>
+                </label>
+            </div>
+
+            <div class="batch-calculation">
+                <h2>Расчет партии</h2>
+                <div class="batch-input-wrapper">
+                    <label>
+                        <span class="label-text">Мои вложения, ₸ <span class="info-icon" title="Сумма, которую планируете вложить в закупку товара"></span></span>
+                        <input type="number" id="batchInvestment">
+                    </label>
+                </div>
+                <div class="result-group">
+                    <label>
+                        <span>Количество товара <span class="info-icon" title="Количество товара, которое можно купить на введенную сумму"></span></span>
+                        <span class="result-value"><span id="batchQuantity">0</span> шт.</span>
+                    </label>
+                    <label>
+                        <span>Выручка <span class="info-icon" title="Общая сумма от продажи всех товаров"></span></span>
+                        <span class="result-value"><span id="batchRevenue">0</span> ₸</span>
+                    </label>
+                    <label>
+                        <span>Маржинальная прибыль <span class="info-icon" title="Общая прибыль от продажи всех товаров"></span></span>
+                        <span class="result-value"><span id="batchProfit">0</span> ₸</span>
+                    </label>
+                    <label>
+                        <span>Точка безубыточности <span class="info-icon" title="Количество товара, которое нужно продать для покрытия вложений"></span></span>
+                        <span class="result-value"><span id="breakEvenPoint">0</span> шт.</span>
+                    </label>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <canvas id="salesChart"></canvas>
-</div>
+    <script>
+        const itemPrice = document.getElementById('itemPrice');
+        const itemCost = document.getElementById('itemCost');
+        const itemWeight = document.getElementById('itemWeight');
+        const kaspiCommission = document.getElementById('kaspiCommission');
+        const kaspiCommissionTenge = document.getElementById('kaspiCommissionTenge');
+        const deliveryType = document.getElementById('deliveryType');
+        const deliveryCost = document.getElementById('deliveryCost');
+        const taxes = document.getElementById('taxes');
+        const kaspiPay = document.getElementById('kaspiPay');
+        const otherExpenses = document.getElementById('otherExpenses');
 
-<script>
-    // Преобразуем строковые даты в объект Date и группируем по месяцам
-    function processDates(dates) {
-        const salesData = dates.reduce((acc, dateStr) => {
-            const date = new Date(dateStr.split('.').reverse().join('-'));  // Преобразуем 'DD.MM.YYYY' в 'YYYY-MM-DD'
-            const monthYear = `${date.getMonth() + 1}-${date.getFullYear()}`;
-            acc[monthYear] = (acc[monthYear] || 0) + 1;
-            return acc;
-        }, {});
+        const totalInvestments = document.getElementById('totalInvestments');
+        const profitability = document.getElementById('profitability');
+        const marginality = document.getElementById('marginality');
+        const minPrice = document.getElementById('minPrice');
+        const marginalProfit = document.getElementById('marginalProfit');
 
-        // Получаем отсортированные данные по месяцам
-        const labels = Object.keys(salesData).sort((a, b) => {
-            const [monthA, yearA] = a.split('-').map(Number);
-            const [monthB, yearB] = b.split('-').map(Number);
-            return new Date(yearA, monthA - 1) - new Date(yearB, monthB - 1);
+        const defectPercent = document.getElementById('defectPercent');
+        const defectTenge = document.getElementById('defectTenge');
+
+        function calculate() {
+            const price = parseFloat(itemPrice.value) || 0;
+            const cost = parseFloat(itemCost.value) || 0;
+            const commissionPercent = parseFloat(kaspiCommission.value) || 0;
+            const defectPercentValue = parseFloat(defectPercent.value) || 0;
+            const otherExp = parseFloat(otherExpenses.value) || 0;
+            const delivery = parseFloat(deliveryType.value) || 0;
+        
+            // Расчет комиссии в тенге
+            const commissionTenge = (price * commissionPercent) / 100;
+            kaspiCommissionTenge.value = commissionTenge.toFixed(2);
+        
+            // Расчет брака в тенге
+            const defectAmount = (price * defectPercentValue) / 100;
+            defectTenge.value = defectAmount.toFixed(2);
+        
+            // Расчет налогов и Kaspi Pay
+            taxes.value = (price * 0.03).toFixed(2);
+            kaspiPay.value = (price * 0.0095).toFixed(2);
+        
+            // Общие вложения (включая расходы на брак)
+            const total = cost + otherExp + defectAmount;
+            totalInvestments.value = total.toFixed(2);
+        
+            // Расчет доходности, маржинальности и минимальной цены
+            const profit = price - total - parseFloat(kaspiPay.value) - commissionTenge - delivery - parseFloat(taxes.value);
+            const profitabilityPercent = (profit / total) * 100;
+            const expenses = total + parseFloat(kaspiPay.value) + commissionTenge + delivery + parseFloat(taxes.value);
+            const marginalityPercent = ((price - expenses) / price) * 100;
+            const minimumPrice = total + commissionTenge + delivery + parseFloat(taxes.value) + parseFloat(kaspiPay.value);
+        
+            profitability.value = isFinite(profitabilityPercent) ? profitabilityPercent.toFixed(0) : 0;
+            marginality.value = isFinite(marginalityPercent) ? marginalityPercent.toFixed(0) : 0;
+            minPrice.value = minimumPrice.toFixed(0);
+        
+            // Маржинальная прибыль
+            marginalProfit.value = profit.toFixed(0);
+        
+            updateUnits();
+        }
+
+        itemPrice.addEventListener('input', calculate);
+        itemCost.addEventListener('input', calculate);
+        kaspiCommission.addEventListener('input', calculate);
+        deliveryType.addEventListener('change', () => {
+            deliveryCost.value = deliveryType.value;
+            calculate();
         });
+        otherExpenses.addEventListener('input', calculate);
+        defectPercent.addEventListener('input', calculate);
 
-        const sales = labels.map(label => salesData[label]);
+        const batchInvestment = document.getElementById('batchInvestment');
+        const batchQuantity = document.getElementById('batchQuantity');
+        const batchRevenue = document.getElementById('batchRevenue');
+        const batchProfit = document.getElementById('batchProfit');
+        const breakEvenPoint = document.getElementById('breakEvenPoint');
 
-        // Массив месяцев для отображения на оси X
-        const months = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь'];
-
-        const formattedLabels = labels.map(label => {
-            const [month, year] = label.split('-');
-            return `${months[month - 1]} ${year}`;
-        });
-
-        return { formattedLabels, sales };
-    }
-
-    // Функция загрузки данных с учетом выбранного диапазона
-    function loadData() {
-        const dateRange = document.getElementById("dateRange").value;
-        const today = new Date();
-        const startDate = new Date(today.getFullYear(), today.getMonth() - dateRange, 1);
-
-        // Получаем данные для графика из URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const dates = JSON.parse(urlParams.get("dates") || "[]");
-
-        // Фильтруем данные по выбранному диапазону
-        const filteredDates = dates.filter(dateStr => {
-            const date = new Date(dateStr.split('.').reverse().join('-'));
-            return date >= startDate;
-        });
-
-        const { formattedLabels, sales } = processDates(filteredDates);
-
-        // Отрисовка графика с помощью Chart.js
-        const ctx = document.getElementById('salesChart').getContext('2d');
-        if (window.chart) window.chart.destroy();  // Удаляем предыдущий график перед рисованием нового
-
-        window.chart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: formattedLabels,
-                datasets: [{
-                    label: 'Количество продаж',
-                    data: sales,
-                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                scales: {
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Месяц'
-                        },
-                        ticks: {
-                            maxRotation: 45,
-                            minRotation: 45
-                        }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Количество продаж'
-                        },
-                        ticks: {
-                            suggestedMin: 0,
-                            stepSize: 1
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        position: 'top'
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                return `Продажи: ${context.raw}`;
-                            }
-                        }
-                    }
-                }
+        function calculateBatch() {
+            const investment = parseFloat(batchInvestment.value) || 0;
+            const unitCost = parseFloat(itemCost.value) || 0;
+            const unitPrice = parseFloat(itemPrice.value) || 0;
+            const unitProfit = parseFloat(marginalProfit.value) || 0;
+            const minPriceValue = parseFloat(minPrice.value) || 0;
+            
+            if (investment > 0 && unitCost > 0) {
+                // Количество товара, которое можно купить на введенную сумму инвестиций
+                const quantity = Math.floor(investment / unitCost);
+                
+                // Общая выручка (цена * количество)
+                const revenue = quantity * unitPrice;
+                
+                // Общая маржинальная прибыль (прибыль с единицы * количество)
+                const profit = quantity * unitProfit;
+                
+                // Точка безубыточности в штуках
+                // Сколько товаров нужно продать, чтобы покрыть инвестиции
+                const breakEven = Math.round(investment / minPriceValue); // Используем Math.round для округления по правилам математики
+                
+                // Обновляем значения с форматированием для русской локали
+                batchQuantity.textContent = quantity.toLocaleString('ru-RU');
+                batchRevenue.textContent = revenue.toLocaleString('ru-RU');
+                batchProfit.textContent = profit.toLocaleString('ru-RU');
+                breakEvenPoint.textContent = breakEven.toLocaleString('ru-RU');
+            } else {
+                batchQuantity.textContent = '0';
+                batchRevenue.textContent = '0';
+                batchProfit.textContent = '0';
+                breakEvenPoint.textContent = '0';
             }
+        
+            updateUnits();
+        }
+
+        batchInvestment.addEventListener('input', calculateBatch);
+
+        // Также нужно пересчитывать партию при изменении любых параметров товара
+        itemPrice.addEventListener('input', () => {
+            calculate();
+            calculateBatch();
         });
-    }
+        itemCost.addEventListener('input', () => {
+            calculate();
+            calculateBatch();
+        });
+        kaspiCommission.addEventListener('input', () => {
+            calculate();
+            calculateBatch();
+        });
+        defectPercent.addEventListener('input', () => {
+            calculate();
+            calculateBatch();
+        });
+        deliveryType.addEventListener('change', () => {
+            deliveryCost.value = deliveryType.value;
+            calculate();
+            calculateBatch();
+        });
+        otherExpenses.addEventListener('input', () => {
+            calculate();
+            calculateBatch();
+        });
 
-    // Загружаем данные при первом запуске
-    loadData();
-</script>
-
+        function updateUnits() {
+            const inputs = document.querySelectorAll('.result-value-wrapper input');
+            inputs.forEach(input => {
+                const unit = input.nextElementSibling;
+                if (unit && unit.classList.contains('unit')) {
+                    unit.style.opacity = (input.value && parseFloat(input.value) !== 0) ? '1' : '0';
+                }
+            });
+        }
+    </script>
+    <script type="module" src="api.js"></script>
 </body>
 </html>
