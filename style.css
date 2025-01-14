@@ -1,0 +1,323 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    color: #212529;
+    padding: 32px;
+    background: #fff;
+    line-height: 1.4;
+}
+
+h1 {
+    font-size: 24px;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #212529;
+}
+
+.product-title {
+    font-size: 16px;
+    margin-bottom: 8px;
+    color: #212529;
+}
+
+.breadcrumb {
+    color: #6c757d;
+    font-size: 13px;
+    margin-bottom: 32px;
+}
+
+.container {
+    display: flex;
+    gap: 48px;
+    max-width: 1200px;
+}
+
+.form-section {
+    flex: 3;
+}
+
+.result-section {
+    flex: 2;
+    background: #F8F9FA;
+    border-radius: 8px;
+    padding: 24px;
+}
+
+.section {
+    margin-bottom: 32px;
+}
+
+h2 {
+    font-size: 16px;
+    color: #212529;
+    margin-bottom: 16px;
+    font-weight: 500;
+}
+
+.form-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+}
+
+.label-text {
+    display: block;
+    color: #6c757d;
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
+input, select {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    background: #fff;
+    height: 36px;
+}
+
+input[readonly] {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    cursor: default;
+}
+
+.inline-group {
+    display: flex;
+    gap: 8px;
+}
+
+.inline-group label:first-child {
+    flex: 1;
+}
+
+.tenge-label {
+    width: 120px;
+    flex-shrink: 0;
+}
+
+.delivery-group {
+    margin-top: 16px;
+}
+
+select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23212529' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+}
+
+.info-icon::after {
+    content: "ⓘ";
+    margin-left: 4px;
+    color: #6c757d;
+    font-size: 12px;
+    cursor: help;
+}
+
+/* Стили для правой секции */
+.result-section h2 {
+    font-size: 16px;
+    color: #212529;
+    margin-bottom: 24px;
+    font-weight: 500;
+}
+
+.result-group {
+    margin-bottom: 32px;
+}
+
+.result-section label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    font-size: 14px;
+    color: #212529;
+}
+
+.result-section label span:first-child {
+    color: #6C757D;
+}
+
+.result-section input[readonly] {
+    background: transparent;
+    border: none;
+    text-align: right;
+    padding: 0;
+    width: auto;
+    color: #212529;
+    font-weight: 500;
+}
+
+/* Обновляем стили для wrapper с единицами измерения */
+.result-value-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.result-value-wrapper .unit {
+    color: #6C757D;
+    font-size: 14px;
+    opacity: 0; /* Скрываем по умолчанию */
+    transition: opacity 0.2s;
+}
+
+/* Показываем единицы измерения только когда есть значение */
+.result-value-wrapper input[value]:not([value=""]) ~ .unit {
+    opacity: 1;
+}
+
+/* Убираем старые стили с псевдоэлементами */
+.result-section input[readonly]::after,
+#profitability::after,
+#marginality::after {
+    content: none;
+}
+
+/* Добавляем стили для info-icon в правой секции */
+.result-section .info-icon::after {
+    color: #ADB5BD;
+}
+
+/* Стили для значений с единицами измерения в расчете партии */
+.batch-calculation .result-value {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Дополнительные стили для улучшения внешнего вида */
+input:focus, select:focus {
+    outline: none;
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+/* Стили для тултипов */
+.info-icon {
+    position: relative;
+    display: inline-block;
+}
+
+.info-icon::after {
+    content: "ⓘ";
+    margin-left: 4px;
+    color: #6c757d;
+    font-size: 12px;
+    cursor: help;
+}
+
+.info-icon:hover::before {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 8px 12px;
+    background: #212529;
+    color: #fff;
+    font-size: 12px;
+    border-radius: 4px;
+    white-space: nowrap;
+    z-index: 1000;
+    margin-bottom: 8px;
+}
+
+.info-icon:hover::after {
+    color: #212529;
+}
+
+/* Медиа-запросы для адаптивности */
+@media (max-width: 768px) {
+    body {
+        padding: 16px;
+        padding-bottom: 60px; /* Увеличиваем отступ снизу для лучшей видимости */
+    }
+
+    .container {
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .form-section {
+        flex: none;
+        width: 100%;
+    }
+
+    .result-section {
+        flex: none;
+        width: 100%;
+        position: static; /* Убираем position: sticky */
+        margin-top: 32px;
+    }
+
+    /* Уменьшаем отступы для мобильной версии */
+    .section {
+        margin-bottom: 24px;
+    }
+
+    .form-group {
+        grid-template-columns: 1fr; /* Одна колонка на мобильных */
+    }
+
+    .inline-group {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .tenge-label {
+        width: 100%;
+    }
+
+    /* Увеличиваем размер интерактивных элементов */
+    input, select {
+        height: 44px;
+        font-size: 16px;
+    }
+
+    /* Улучшаем читаемость результатов */
+    .result-value-wrapper {
+        font-size: 16px;
+    }
+
+    /* Уменьшаем отступы в правой секции */
+    .result-section {
+        padding: 20px;
+    }
+
+    .batch-calculation {
+        margin-top: 24px;
+        padding-top: 20px;
+    }
+}
+
+/* Дополнительные стили для очень маленьких экранов */
+@media (max-width: 375px) {
+    body {
+        padding: 12px;
+        padding-bottom: 60px; /* Увеличиваем отступ снизу для очень маленьких экранов */
+    }
+
+    .result-section {
+        padding: 16px;
+    }
+}
