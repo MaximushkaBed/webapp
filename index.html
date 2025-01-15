@@ -318,11 +318,16 @@
         }
     </script>
     <script type="module" src="api.js"></script>
-    <script>
-  if (window.innerWidth > 1024) {
-    document.body.style.width = "1200px";  // Устанавливаем фиксированную ширину для ПК
-  }
-</script>
-
+    <script> 
+            window.addEventListener('beforeunload', function (e) {
+        // Отменяем событие для Chrome
+        e.preventDefault();
+        // Chrome требует returnValue
+        e.returnValue = '';
+        
+        // Стандартное сообщение (текст может отличаться в разных браузерах)
+        return 'Внимание! Все несохраненные данные будут потеряны. Вы уверены, что хотите покинуть страницу?';
+    });
+    </script>
 </body>
 </html>
