@@ -145,6 +145,7 @@ select {
 
 .result-section label span:first-child {
     color: #6C757D;
+    flex: 1;
 }
 
 .result-section input[readonly] {
@@ -152,7 +153,7 @@ select {
     border: none;
     text-align: right;
     padding: 0;
-    width: auto;
+    width: 80px;
     color: #212529;
     font-weight: 500;
 }
@@ -162,13 +163,13 @@ select {
     display: flex;
     align-items: center;
     gap: 4px;
+    min-width: 100px;
 }
 
 .result-value-wrapper .unit {
     color: #6C757D;
     font-size: 14px;
-    opacity: 0; /* Скрываем по умолчанию */
-    transition: opacity 0.2s;
+    width: 16px;
 }
 
 /* Показываем единицы измерения только когда есть значение */
@@ -320,4 +321,47 @@ input[type=number] {
     .result-section {
         padding: 16px;
     }
+
+    .result-section input[readonly] {
+        width: 70px;
+    }
+    
+    .result-value-wrapper {
+        min-width: 90px;
+    }
+}
+
+/* Стили для расчета партии */
+.batch-input-wrapper {
+    margin-bottom: 24px;
+}
+
+.batch-input-wrapper label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start; /* Выравниваем элементы по левому краю */
+}
+
+.batch-input-wrapper .label-text {
+    color: #6C757D;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    text-align: left; /* Выравниваем текст по левому краю */
+}
+
+.batch-input-wrapper input {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    background: #fff;
+    height: 36px;
+}
+
+/* Добавляем стили для иконки информации, если она есть */
+.batch-input-wrapper .info-icon {
+    margin-left: 4px;
 }
