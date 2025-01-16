@@ -50,10 +50,10 @@ h1 {
 
 .result-section {
     flex: 1;
+    padding: 16px;
     margin-left: 16px;
     background: #F8F9FA;
     border-radius: 8px;
-    padding: 24px;
 }
 
 .section {
@@ -348,6 +348,7 @@ input[type=number] {
 
     .result-section {
         padding: 16px;
+        margin-left: 0;
     }
 
     .result-section input[readonly] {
