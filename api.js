@@ -22,6 +22,13 @@ function fillFormFields(data) {
     document.getElementById('itemWeight').value = data.weight || '';
     document.getElementById('kaspiCommission').value = data.kaspiCommission || '';
 
+    // Запускаем перерасчет стоимости доставки
+    const price = parseFloat(data.price) || 0;
+    const weight = parseFloat(data.weight) || 0;
+    const deliveryType = document.getElementById('deliveryType').value;
+    const deliveryCost = calculateDeliveryPrice(price, weight, deliveryType);
+    document.getElementById('deliveryCost').value = deliveryCost;
+
     // Запускаем перерасчет
     calculate();
 }
