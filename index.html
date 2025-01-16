@@ -767,6 +767,15 @@
             calculate();
             calculateBatch();
         });
+
+        window.addEventListener('load', function() {
+            if (window.innerWidth <= 768) { // Проверяем, что ширина экрана меньше или равна 768px
+                const resultSection = document.querySelector('.result-section');
+                if (resultSection) {
+                    resultSection.style.marginLeft = '0px'; // Устанавливаем margin-left на 0px только для мобильной версии
+                }
+            }
+        });
     </script>
     <script type="module" src="api.js"></script>
     <script> 
