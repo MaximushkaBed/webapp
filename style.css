@@ -20,29 +20,37 @@ h1 {
 }
 
 .product-title {
-    font-size: 16px;
-    margin-bottom: 8px;
+    font-size: 18px;
+    font-weight: 500;
     color: #212529;
+    margin: 64px 50px 4px;
+    padding: 0;
+    line-height: 1.2;
 }
 
 .breadcrumb {
+    font-size: 14px;
     color: #6c757d;
-    font-size: 13px;
-    margin-bottom: 32px;
+    margin: 0 50px 30px;
+    padding: 0;
+    line-height: 1.2;
 }
 
 .container {
     display: flex;
-    gap: 48px;
-    max-width: 1200px;
+    justify-content: space-between;
+    padding: 0 50px;
+    margin-top: var(--content-top-margin);
 }
 
 .form-section {
-    flex: 3;
+    flex: 1;
+    margin-right: 16px;
 }
 
 .result-section {
-    flex: 2;
+    flex: 1;
+    margin-left: 16px;
     background: #F8F9FA;
     border-radius: 8px;
     padding: 24px;
@@ -256,7 +264,9 @@ input[type=number] {
 
     .container {
         flex-direction: column;
-        gap: 24px;
+        gap: 16px;
+        margin-top: var(--content-top-margin);
+        padding: 0 16px;
     }
 
     .form-section {
@@ -309,6 +319,23 @@ input[type=number] {
         margin-top: 24px;
         padding-top: 20px;
     }
+
+    .product-title {
+        font-size: 18px;
+        margin: 56px 16px 4px;
+        font-weight: 600;
+        color: #000;
+    }
+    
+    .breadcrumb {
+        font-size: 13px;
+        margin: 0 16px 12px;
+        color: #495057;
+    }
+
+    .container {
+        padding: 0 16px;
+    }
 }
 
 /* Дополнительные стили для очень маленьких экранов */
@@ -328,6 +355,20 @@ input[type=number] {
     
     .result-value-wrapper {
         min-width: 90px;
+    }
+
+    .product-title {
+        font-size: 16px;
+        margin: 48px 12px 4px;
+    }
+    
+    .breadcrumb {
+        font-size: 12px;
+        margin: 0 12px 8px;
+    }
+
+    .container {
+        padding: 0 12px;
     }
 }
 
@@ -364,4 +405,328 @@ input[type=number] {
 /* Добавляем стили для иконки информации, если она есть */
 .batch-input-wrapper .info-icon {
     margin-left: 4px;
+}
+
+/* Стили для кнопки избранного */
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.favorite-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+}
+
+.favorite-btn svg {
+    fill: #dee2e6;
+    transition: fill 0.2s;
+}
+
+.favorite-btn.active svg {
+    fill: #dc3545;
+}
+
+/* Стили для меню избранного */
+.favorites-menu {
+    position: fixed;
+    right: -320px;
+    top: 0;
+    width: 320px;
+    height: 100vh;
+    background: #fff;
+    box-shadow: -2px 0 8px rgba(0,0,0,0.1);
+    transition: right 0.3s;
+    z-index: 1000;
+}
+
+.favorites-menu.open {
+    right: 0;
+}
+
+.favorites-header {
+    padding: 16px;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.favorites-list {
+    padding: 16px;
+    overflow-y: auto;
+    max-height: calc(100vh - 60px);
+}
+
+.favorite-item {
+    padding: 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+
+.favorite-item:hover {
+    background: #f8f9fa;
+}
+
+.favorite-item-title {
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.favorite-item-breadcrumb {
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.favorite-item-details {
+    font-size: 12px;
+    color: #6c757d;
+    margin-top: 4px;
+}
+
+.open-favorites-btn {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #fff;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    cursor: pointer;
+    z-index: 999;
+}
+
+.favorites-page {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #fff;
+    z-index: 1001;
+    display: none;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.favorites-page.open {
+    display: block;
+}
+
+.favorites-header {
+    display: none;
+}
+
+.favorites-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+    padding: 0;
+}
+
+.favorite-item {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 16px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.favorite-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.favorite-item-details {
+    margin-top: 8px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 4px 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.detail-row strong {
+    color: #333;
+}
+
+.favorite-item-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+
+.favorite-item-breadcrumb {
+    font-size: 12px;
+    color: #666;
+    margin: 4px 0;
+}
+
+.header-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+    padding: 16px;
+    z-index: 1002;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    gap: 24px;
+}
+
+.nav-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    padding: 8px 16px;
+    cursor: pointer;
+    color: #6c757d;
+    transition: color 0.2s, border-bottom-color 0.2s;
+    border-bottom: 2px solid transparent;
+}
+
+.nav-btn.active {
+    color: #212529;
+    font-weight: 500;
+    border-bottom-color: #212529;
+}
+
+/* Медиа-запросы для мобильных устройств */
+@media (max-width: 768px) {
+    .header-nav {
+        padding: 12px;
+    }
+
+    .nav-btn {
+        font-size: 16px;
+        padding: 8px;
+    }
+
+    .favorites-page {
+        top: 52px; /* Уменьшаем отступ сверху */
+        padding: 12px;
+    }
+
+    .favorites-list {
+        grid-template-columns: 1fr; /* Одна колонка на мобильных */
+        gap: 12px;
+    }
+
+    .favorite-item {
+        padding: 12px;
+    }
+
+    .favorite-item-title {
+        font-size: 14px;
+    }
+
+    .favorite-item-breadcrumb {
+        font-size: 11px;
+    }
+
+    .detail-row {
+        font-size: 12px;
+        margin: 2px 0;
+    }
+}
+
+/* Для очень маленьких экранов */
+@media (max-width: 375px) {
+    .header-nav {
+        padding: 8px;
+    }
+
+    .nav-btn {
+        font-size: 14px;
+        padding: 6px;
+    }
+
+    .favorites-page {
+        top: 44px;
+        padding: 8px;
+    }
+
+    .favorite-item {
+        padding: 10px;
+    }
+}
+
+.delete-favorite {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: none;
+    background: #f8f9fa;
+    color: #6c757d;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.delete-favorite:hover {
+    background: #dc3545;
+    color: #fff;
+}
+
+/* Обновляем стили для favorite-item */
+.favorite-item {
+    position: relative;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 16px;
+    padding-right: 40px; /* Добавляем отступ справа для кнопки */
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+/* Медиа-запрос для мобильных устройств */
+@media (max-width: 768px) {
+    .delete-favorite {
+        width: 32px;
+        height: 32px;
+        font-size: 20px;
+    }
+}
+
+#productTitleInput {
+    margin-bottom: 16px;
+}
+
+#productTitleInput input {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    background: #fff;
+    height: 36px;
+}
+
+#productTitleInput input:focus {
+    outline: none;
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+}
+
+:root {
+    --content-top-margin: 56px;
 }
