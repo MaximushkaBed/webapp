@@ -8,17 +8,25 @@
 
 </head>
 <body>
-    <h1>Калькулятор прибыли</h1>
-    <div class="product-title"></div>
-    <div class="breadcrumb">
-        
+    <div class="header-nav">
+        <button class="nav-btn active" onclick="showCalculator()">Калькулятор прибыли</button>
+        <button class="nav-btn" onclick="toggleFavoritesPage()">
+            Избранное
+            <span class="favorites-count"></span>
+        </button>
     </div>
+    <div class="product-title" contenteditable="false"></div>
+    <div class="breadcrumb" contenteditable="false"></div>
     
     <div class="container">
         <div class="form-section">
             <div class="section">
                 <h2>Товар</h2>
                 <div class="form-group">
+                    <label id="productTitleInput" style="display: none;">
+                        <span class="label-text">Название товара</span>
+                        <input type="text" id="manualProductTitle">
+                    </label>
                     <label>
                         <span class="label-text">Стоимость, ₸ <span class="info-icon" title="Цена продажи товара"></span></span>
                         <input type="number" id="itemPrice">
@@ -62,8 +70,8 @@
                             <label>
                                 <span class="label-text">Тип доставки <span class="info-icon" title="Выберите тип доставки: межгород или городская"></span></span>
                                 <select id="deliveryType">
-                                    <option value="0" selected>Межгород</option>
-                                    <option value="500">Городская</option>
+                                    <option value="city">По городу</option>
+                                    <option value="country">По Казахстану</option>
                                 </select>
                             </label>
                             <label class="tenge-label">
@@ -80,7 +88,7 @@
                 <div class="form-group">
                     <label>
                         <span class="label-text">Налоги, ₸ <span class="info-icon" title="Налоги с продажи (3% от стоимости)"></span></span>
-                        <input type="number" id="taxes"  readonly>
+                        <input type="number" id="taxes" readonly>
                     </label>
                     <label>
                         <span class="label-text">Kaspi Pay, ₸ <span class="info-icon" title="Комиссия за прием платежей (0.95% от стоимости)"></span></span>
@@ -95,7 +103,14 @@
         </div>
 
         <div class="result-section">
-            <h2>Расчет за 1 единицу</h2>
+            <div class="result-header">
+                <h2>Расчет за 1 единицу</h2>
+                <button class="favorite-btn" title="Добавить в избранное">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    </svg>
+                </button>
+            </div>
             <div class="result-group">
                 <label>
                     <span>Вложения <span class="info-icon" title="Общая сумма затрат на единицу товара"></span></span>
@@ -164,7 +179,38 @@
         </div>
     </div>
 
+    <div class="favorites-page">
+        <div class="favorites-list">
+            <!-- Сюда будут добавляться избранные товары -->
+        </div>
+    </div>
+
     <script>
+        // Добавим в начало скрипта глобальную переменную
+        let hasUrlParams;
+
+        // Обновим функцию проверки параметров URL
+        function checkUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            hasUrlParams = urlParams.has('productTitle') || urlParams.has('breadcrumb');
+            
+            const productTitleInput = document.getElementById('productTitleInput');
+            const productTitle = document.querySelector('.product-title');
+            const breadcrumb = document.querySelector('.breadcrumb');
+            
+            if (!hasUrlParams) {
+                productTitleInput.style.display = 'block';
+                productTitle.style.display = 'none';
+                breadcrumb.style.display = 'none';
+                document.documentElement.style.setProperty('--content-top-margin', '56px');
+            } else {
+                productTitleInput.style.display = 'none';
+                productTitle.style.display = 'block';
+                breadcrumb.style.display = 'block';
+                document.documentElement.style.setProperty('--content-top-margin', '0');
+            }
+        }
+
         const itemPrice = document.getElementById('itemPrice');
         const itemCost = document.getElementById('itemCost');
         const itemWeight = document.getElementById('itemWeight');
@@ -185,13 +231,43 @@
         const defectPercent = document.getElementById('defectPercent');
         const defectTenge = document.getElementById('defectTenge');
 
+        function calculateDeliveryPrice(price, weight, deliveryType) {
+            const priceNum = parseFloat(price);
+            const weightNum = parseFloat(weight);
+            
+            // Если цена от 5000 до 15000
+            if (priceNum >= 5000 && priceNum < 15000) {
+                return deliveryType === 'city' ? 549 : 699;
+            }
+            
+            // Если цена больше или равна 15000
+            if (priceNum >= 15000) {
+                // Вес более 50 кг
+                if (weightNum > 50) {
+                    return deliveryType === 'city' ? 3199 : 3999;
+                }
+                // Вес от 15 до 50 кг включительно
+                if (weightNum > 15) {
+                    return deliveryType === 'city' ? 2199 : 2699;
+                }
+                // Вес от 5 до 15 кг включительно
+                if (weightNum >= 5) {
+                    return deliveryType === 'city' ? 899 : 1499;
+                }
+                // Вес до 5 кг
+                return deliveryType === 'city' ? 649 : 1099;
+            }
+            
+            return 0; // Если цена меньше 5000
+        }
+
         function calculate() {
             const price = parseFloat(itemPrice.value) || 0;
             const cost = parseFloat(itemCost.value) || 0;
             const commissionPercent = parseFloat(kaspiCommission.value) || 0;
             const defectPercentValue = parseFloat(defectPercent.value) || 0;
             const otherExp = parseFloat(otherExpenses.value) || 0;
-            const delivery = parseFloat(deliveryType.value) || 0;
+            const delivery = parseFloat(deliveryCost.value) || 0;
         
             // Расчет комиссии в тенге
             const commissionTenge = (price * commissionPercent) / 100;
@@ -230,8 +306,15 @@
         itemCost.addEventListener('input', calculate);
         kaspiCommission.addEventListener('input', calculate);
         deliveryType.addEventListener('change', () => {
-            deliveryCost.value = deliveryType.value;
+            const price = parseFloat(document.getElementById('itemPrice').value) || 0;
+            const weight = parseFloat(document.getElementById('itemWeight').value) || 0;
+            const deliveryType = document.getElementById('deliveryType').value;
+            
+            const deliveryCost = calculateDeliveryPrice(price, weight, deliveryType);
+            document.getElementById('deliveryCost').value = deliveryCost;
+            
             calculate();
+            calculateBatch();
         });
         otherExpenses.addEventListener('input', calculate);
         defectPercent.addEventListener('input', calculate);
@@ -244,7 +327,7 @@
 
         function calculateBatch() {
             const investment = parseFloat(batchInvestment.value) || 0;
-            const unitCost = parseFloat(itemCost.value) || 0;
+            const unitCost = parseFloat(totalInvestments.value) || 0;
             const unitPrice = parseFloat(itemPrice.value) || 0;
             const unitProfit = parseFloat(marginalProfit.value) || 0;
             const minPriceValue = parseFloat(minPrice.value) || 0;
@@ -298,7 +381,13 @@
             calculateBatch();
         });
         deliveryType.addEventListener('change', () => {
-            deliveryCost.value = deliveryType.value;
+            const price = parseFloat(document.getElementById('itemPrice').value) || 0;
+            const weight = parseFloat(document.getElementById('itemWeight').value) || 0;
+            const deliveryType = document.getElementById('deliveryType').value;
+            
+            const deliveryCost = calculateDeliveryPrice(price, weight, deliveryType);
+            document.getElementById('deliveryCost').value = deliveryCost;
+            
             calculate();
             calculateBatch();
         });
@@ -316,6 +405,368 @@
                 }
             });
         }
+
+        // Функции для работы с избранным
+        const favoritesStorage = {
+            // Получить все избранные товары
+            getAll() {
+                return JSON.parse(localStorage.getItem('favorites') || '[]');
+            },
+
+            // Добавить товар в избранное
+            add(item) {
+                const favorites = this.getAll();
+                favorites.push(item);
+                localStorage.setItem('favorites', JSON.stringify(favorites));
+            },
+
+            // Удалить товар из избранного
+            remove(index) {
+                const favorites = this.getAll();
+                favorites.splice(index, 1);
+                localStorage.setItem('favorites', JSON.stringify(favorites));
+            }
+        };
+
+        // Функция для проверки обязательных полей
+        function validateRequiredFields() {
+            const required = {
+                'itemPrice': 'Стоимость',
+                'itemCost': 'Себестоимость',
+                'itemWeight': 'Вес',
+                'kaspiCommission': 'Комиссия Kaspi'
+            };
+            
+            const emptyFields = [];
+            
+            for (const [id, name] of Object.entries(required)) {
+                const value = document.getElementById(id).value;
+                if (!value || value === '0') {
+                    emptyFields.push(name);
+                }
+            }
+            
+            return emptyFields;
+        }
+
+        // Функция для сравнения текущих данных с сохраненными
+        function compareWithSaved(current, saved) {
+            return (
+                current.productTitle === saved.productTitle && // Добавляем проверку названия
+                current.price === saved.price &&
+                current.itemCost === saved.itemCost &&
+                current.itemWeight === saved.itemWeight &&
+                current.kaspiCommission === saved.kaspiCommission &&
+                current.defectPercent === saved.defectPercent &&
+                current.otherExpenses === saved.otherExpenses &&
+                current.deliveryType === saved.deliveryType
+            );
+        }
+
+        // Функция для сохранения/удаления из избранного
+        function toggleFavorite() {
+            const currentData = {
+                productTitle: document.getElementById('manualProductTitle')?.value || 
+                             document.querySelector('.product-title').textContent,
+                breadcrumb: document.querySelector('.breadcrumb').textContent,
+                price: document.getElementById('itemPrice').value,
+                itemCost: document.getElementById('itemCost').value,
+                itemWeight: document.getElementById('itemWeight').value,
+                kaspiCommission: document.getElementById('kaspiCommission').value,
+                defectPercent: document.getElementById('defectPercent').value,
+                otherExpenses: document.getElementById('otherExpenses').value,
+                deliveryType: document.getElementById('deliveryType').value
+            };
+
+            const favorites = favoritesStorage.getAll();
+            const existingIndex = favorites.findIndex(item => compareWithSaved(currentData, item));
+
+            if (existingIndex !== -1) {
+                // Если товар уже в избранном - удаляем
+                favoritesStorage.remove(existingIndex);
+            } else {
+                // Если товара нет в избранном - проверяем поля и добавляем
+                const emptyFields = validateRequiredFields();
+                if (emptyFields.length > 0) {
+                    alert(`Заполните обязательные поля:\n${emptyFields.join('\n')}`);
+                    return;
+                }
+                favoritesStorage.add({...currentData, timestamp: new Date().toISOString()});
+            }
+
+            updateFavoriteButton();
+            updateFavoritesList();
+        }
+
+        // Функция обновления состояния кнопки избранного
+        function updateFavoriteButton() {
+            const favoriteBtn = document.querySelector('.favorite-btn');
+            const currentData = {
+                productTitle: document.getElementById('manualProductTitle')?.value || 
+                             document.querySelector('.product-title').textContent,
+                breadcrumb: document.querySelector('.breadcrumb').textContent,
+                price: document.getElementById('itemPrice').value,
+                itemCost: document.getElementById('itemCost').value,
+                itemWeight: document.getElementById('itemWeight').value,
+                kaspiCommission: document.getElementById('kaspiCommission').value,
+                defectPercent: document.getElementById('defectPercent').value,
+                otherExpenses: document.getElementById('otherExpenses').value,
+                deliveryType: document.getElementById('deliveryType').value
+            };
+            
+            const favorites = favoritesStorage.getAll();
+            const isMatched = favorites.some(item => compareWithSaved(currentData, item));
+            
+            favoriteBtn.classList.toggle('active', isMatched);
+        }
+
+        // Инициализация обработчиков событий
+        function initializeEventListeners() {
+            const favoriteBtn = document.querySelector('.favorite-btn');
+            if (favoriteBtn && !favoriteBtn._hasClickListener) {
+                favoriteBtn.addEventListener('click', toggleFavorite);
+                favoriteBtn._hasClickListener = true;
+            }
+
+            const inputFields = document.querySelectorAll('input, select');
+            inputFields.forEach(field => {
+                if (!field._hasInputListener) {
+                    field.addEventListener('input', () => {
+                        if (field.id !== 'batchInvestment') {
+                            calculate();
+                            calculateBatch();
+                        }
+                        updateFavoriteButton();
+                    });
+                    field._hasInputListener = true;
+                }
+            });
+        }
+
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            checkUrlParams();
+            initializeEventListeners();
+            updateFavoriteButton();
+            updateFavoritesList();
+        });
+
+        function fillFormFields(data) {
+            // Если данные пришли из избранного, отображаем их как при параметрах URL
+            if (data.productTitle) {
+                hasUrlParams = true;
+                const productTitleInput = document.getElementById('productTitleInput');
+                const productTitle = document.querySelector('.product-title');
+                const breadcrumb = document.querySelector('.breadcrumb');
+                
+                productTitleInput.style.display = 'none';
+                productTitle.style.display = 'block';
+                breadcrumb.style.display = 'block';
+                document.documentElement.style.setProperty('--content-top-margin', '0');
+                
+                productTitle.textContent = data.productTitle;
+                breadcrumb.textContent = data.breadcrumb || '';
+            }
+            
+            document.getElementById('itemPrice').value = data.price || '';
+            document.getElementById('itemCost').value = data.itemCost || '';
+            document.getElementById('itemWeight').value = data.itemWeight || '';
+            document.getElementById('kaspiCommission').value = data.kaspiCommission || '';
+            document.getElementById('defectPercent').value = data.defectPercent || '';
+            document.getElementById('otherExpenses').value = data.otherExpenses || '';
+            document.getElementById('deliveryType').value = data.deliveryType || '';
+
+            // Запускаем перерасчет
+            calculate();
+            calculateBatch();
+            updateFavoriteButton();
+        }
+
+        function showCalculator() {
+            const favoritesPage = document.querySelector('.favorites-page');
+            const container = document.querySelector('.container');
+            
+            favoritesPage.classList.remove('open');
+            container.style.display = 'flex';
+            document.body.style.overflow = '';
+            updateNavButtons('calculator');
+        }
+
+        function toggleFavoritesPage() {
+            const favoritesPage = document.querySelector('.favorites-page');
+            const container = document.querySelector('.container');
+            
+            favoritesPage.classList.add('open');
+            container.style.display = 'none';
+            updateNavButtons('favorites');
+        }
+
+        function updateNavButtons(active) {
+            const buttons = document.querySelectorAll('.nav-btn');
+            buttons.forEach(btn => {
+                if ((btn.textContent.includes('Калькулятор') && active === 'calculator') ||
+                    (btn.textContent.includes('Избранное') && active === 'favorites')) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        // Добавляем обработчики событий
+        document.addEventListener('DOMContentLoaded', () => {
+            // Обработчик для кнопки избранного
+            const favoriteBtn = document.querySelector('.favorite-btn');
+            favoriteBtn.addEventListener('click', toggleFavorite);
+
+            // Обработчик для списка избранного
+            const favoritesList = document.querySelector('.favorites-list');
+            favoritesList.addEventListener('click', (e) => {
+                if (e.target.classList.contains('delete-favorite')) {
+                    e.stopPropagation();
+                    const index = parseInt(e.target.dataset.index);
+                    favoritesStorage.remove(index);
+                    updateFavoritesList();
+                    updateFavoriteButton();
+                } else {
+                    const favoriteItem = e.target.closest('.favorite-item');
+                    if (favoriteItem) {
+                        const index = parseInt(favoriteItem.dataset.index);
+                        const favorites = favoritesStorage.getAll();
+                        const item = favorites[index];
+                        fillFormFields(item);
+                        // Сначала переключаемся на калькулятор
+                        showCalculator();
+                    }
+                }
+            });
+
+            // Инициализация
+            updateFavoriteButton();
+            updateFavoritesList();
+        });
+
+        // Функция обновления списка избранного
+        function updateFavoritesList() {
+            const favoritesList = document.querySelector('.favorites-list');
+            const favorites = favoritesStorage.getAll();
+            
+            favoritesList.innerHTML = favorites.map((item, index) => `
+                <div class="favorite-item" data-index="${index}">
+                    <div class="favorite-item-content">
+                        <div class="favorite-item-title">${item.productTitle || 'Без названия'}</div>
+                        <div class="favorite-item-breadcrumb">${item.breadcrumb || ''}</div>
+                        <div class="favorite-item-details">
+                            <div class="detail-row">
+                                <span>Цена:</span> 
+                                <strong>${parseInt(item.price).toLocaleString('ru-RU')}₸</strong>
+                            </div>
+                            <div class="detail-row">
+                                <span>Доходность:</span>
+                                <strong>${calculateProfitability(item)}%</strong>
+                            </div>
+                            <div class="detail-row">
+                                <span>Маржинальность:</span>
+                                <strong>${calculateMarginality(item)}%</strong>
+                            </div>
+                            <div class="detail-row">
+                                <span>Прибыль:</span>
+                                <strong>${calculateProfit(item).toLocaleString('ru-RU')}₸</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="delete-favorite" data-index="${index}" title="Удалить из избранного">×</button>
+                </div>
+            `).join('');
+        }
+
+        // Добавим вспомогательные функции для расчетов
+        function calculateProfitability(item) {
+            const price = parseFloat(item.price) || 0;
+            const cost = parseFloat(item.itemCost) || 0;
+            const weight = parseFloat(item.itemWeight) || 0;
+            const commissionPercent = parseFloat(item.kaspiCommission) || 0;
+            const defectPercentValue = parseFloat(item.defectPercent) || 0;
+            const otherExp = parseFloat(item.otherExpenses) || 0;
+            
+            const delivery = calculateDeliveryPrice(price, weight, item.deliveryType);
+            const commissionTenge = (price * commissionPercent) / 100;
+            const defectAmount = (price * defectPercentValue) / 100;
+            const taxes = price * 0.03;
+            const kaspiPay = price * 0.0095;
+            
+            const total = cost + otherExp + defectAmount;
+            const profit = price - total - kaspiPay - commissionTenge - delivery - taxes;
+            const profitabilityPercent = (profit / total) * 100;
+            
+            return isFinite(profitabilityPercent) ? Math.round(profitabilityPercent) : 0;
+        }
+
+        function calculateMarginality(item) {
+            const price = parseFloat(item.price) || 0;
+            const cost = parseFloat(item.itemCost) || 0;
+            const weight = parseFloat(item.itemWeight) || 0;
+            const commissionPercent = parseFloat(item.kaspiCommission) || 0;
+            const defectPercentValue = parseFloat(item.defectPercent) || 0;
+            const otherExp = parseFloat(item.otherExpenses) || 0;
+            
+            const delivery = calculateDeliveryPrice(price, weight, item.deliveryType);
+            const commissionTenge = (price * commissionPercent) / 100;
+            const defectAmount = (price * defectPercentValue) / 100;
+            const taxes = price * 0.03;
+            const kaspiPay = price * 0.0095;
+            
+            const total = cost + otherExp + defectAmount;
+            const expenses = total + kaspiPay + commissionTenge + delivery + taxes;
+            const marginalityPercent = ((price - expenses) / price) * 100;
+            
+            return isFinite(marginalityPercent) ? Math.round(marginalityPercent) : 0;
+        }
+
+        function calculateProfit(item) {
+            const price = parseFloat(item.price) || 0;
+            const cost = parseFloat(item.itemCost) || 0;
+            const weight = parseFloat(item.itemWeight) || 0;
+            const commissionPercent = parseFloat(item.kaspiCommission) || 0;
+            const defectPercentValue = parseFloat(item.defectPercent) || 0;
+            const otherExp = parseFloat(item.otherExpenses) || 0;
+            
+            const delivery = calculateDeliveryPrice(price, weight, item.deliveryType);
+            const commissionTenge = (price * commissionPercent) / 100;
+            const defectAmount = (price * defectPercentValue) || 0;
+            const taxes = price * 0.03;
+            const kaspiPay = price * 0.0095;
+            
+            const total = cost + otherExp + defectAmount;
+            const profit = price - total - kaspiPay - commissionTenge - delivery - taxes;
+            
+            return Math.round(profit);
+        }
+
+        // Добавляем обработчики для полей цены и веса
+        document.getElementById('itemPrice').addEventListener('input', () => {
+            const price = parseFloat(document.getElementById('itemPrice').value) || 0;
+            const weight = parseFloat(document.getElementById('itemWeight').value) || 0;
+            const deliveryType = document.getElementById('deliveryType').value;
+            
+            const deliveryCost = calculateDeliveryPrice(price, weight, deliveryType);
+            document.getElementById('deliveryCost').value = deliveryCost;
+            
+            calculate();
+            calculateBatch();
+        });
+
+        document.getElementById('itemWeight').addEventListener('input', () => {
+            const price = parseFloat(document.getElementById('itemPrice').value) || 0;
+            const weight = parseFloat(document.getElementById('itemWeight').value) || 0;
+            const deliveryType = document.getElementById('deliveryType').value;
+            
+            const deliveryCost = calculateDeliveryPrice(price, weight, deliveryType);
+            document.getElementById('deliveryCost').value = deliveryCost;
+            
+            calculate();
+            calculateBatch();
+        });
     </script>
     <script type="module" src="api.js"></script>
     <script> 
