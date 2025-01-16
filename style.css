@@ -278,6 +278,7 @@ input[type=number] {
         flex: none;
         width: 100%;
         position: static; /* Убираем position: sticky */
+        margin-left: 0px;
         margin-top: 32px;
     }
 
